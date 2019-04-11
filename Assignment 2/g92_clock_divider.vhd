@@ -5,6 +5,8 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity g92_clock_divider is
 		Generic (
+		
+		-- T was found using 50 mghz and the internal clock of the altera board
 					T: integer:= 500000);
 					
 		Port (enable		:in	std_logic;
@@ -24,6 +26,7 @@ begin
 	
 		begin
 		
+		-- if reset is performed then reset to 499999
 		if (reset = '0') then
 			count <= T-1;
 			en_out <= '0';
