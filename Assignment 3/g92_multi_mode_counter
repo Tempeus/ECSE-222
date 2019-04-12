@@ -1,0 +1,85 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+entity g92_multi_mode_counter is
+	Port (start 		: in std_logic;
+			stop 			: in std_logic;
+			direction 	: in std_logic;
+			reset 		: in std_logic;
+			clk 			: in std_logic;
+			HEX0 			: out std_logic_vector (6 downto 0);
+			HEX1 			: out std_logic_vector (6 downto 0));
+end g92_multi_mode_counter;
+
+architecture a0 of g92_multi_mode_counter is
+
+	-- 7-segment decoder
+	component g92_7_segment_decoder is
+		port(
+				code					:in std_logic_vector (3 downto 0);
+				segments				:out std_logic_vector (6 downto 0)
+			);
+		end component g92_7_segment_decoder;
+		
+	-- clock divider
+	
+	component g92_clock_divider is
+	Port (
+				enable : in std_logic;
+				reset  : in std_logic;
+				clk    : in std_logic;
+				en_out : out std_logic
+		);
+	end component g92_clock_divider;
+
+	-- FSM
+	component g92_FSM is
+	port (	enable			:in std_logic;
+				direction		:in std_logic;
+				reset				:in std_logic;
+				clk				:in std_logic;
+				count				:out std_logic_vector (3 downto 0));
+	end component g92_FSM;
+	
+	signal clock_enable : std_logic := '0';
+	signal counter 	  : std_logic := '0';
+	signal decimalcount : std_logic_vector (3 downto 0);
+	signal firstdigit   : std_logic_vector(3 downto 0);
+	signal seconddigit  : std_logic_vector (3 downto 0);
+	signal bcd 			  : std_logic_vector (7 downto 0);
+
+	
+begin
+
+	clockdivider : g92_clock_divider port map ( enable => clock_enable, reset => reset, clk => clk, en_out => counter);
+	
+	
+	FSM : g92_FSM port map( enable => clock_enable, direction => direction, reset => reset, clk => counter, count => decimalcount);
+
+
+	process (start, stop, decimalcount)
+	begin
+		
+			if (stop = '0') then
+			clock_enable <= '0';
+		elsif (rising_edge(start)) then 
+				clock_enable <= '1';
+			end if;
+		 
+		
+		if (decimalcount > "1001") then
+			bcd <= std_logic_vector (unsigned (decimalcount) + "00000110");
+			firstdigit <= bcd (3 downto 0);
+			seconddigit <= bcd (7 downto 4);
+		else
+			firstdigit <= decimalcount;
+			seconddigit <= "0000";
+		end if;
+	end process;
+--xclock_divider : g92_clock_divider port map (clock_enable, reset, clk, counter);
+--xCounter			: g92_FSM port map( counter, direction, reset, clk, decimalcount);
+		firstdecoder				: g92_7_segment_decoder port map(firstdigit, HEX0);
+		seconddecoder				: g92_7_segment_decoder port map(seconddigit, HEX1);
+end a0;
+		
+			
