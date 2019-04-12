@@ -1,0 +1,154 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+entity g92_FSM is
+	Port (enable 		: in std_logic;
+			direction 	: in std_logic;
+			reset 		: in std_logic;
+			clk			: in std_logic;
+			count 		: out std_logic_vector (3 downto 0));
+end g92_FSM;
+
+
+architecture a0 of g92_FSM is
+	type stateType is (s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14, s15); -- defining the 15 states 
+	signal State: stateType; -- Defining a signal that uses the previous 15 states
+	
+begin	
+	process (clk, reset)
+		begin
+		if (reset = '0') THEN
+			State <= s1;
+		elsif rising_edge(clk) THEN
+			if enable =	'1' THEN			-- if there is a rising edge, perform the actions below
+			
+			case State is
+			
+				-- if the direction is 1 and the current state is s0, then the next state would be B
+				when s1 =>
+							if direction = '1' THEN
+												State <= s2;
+							else 
+												State <= s15; 
+							end if;
+				
+				when s2 =>
+							if direction = '1' THEN
+												State <= s3;
+							else 
+												State <= s1; 
+							end if;	
+							
+				when s3 =>
+							if direction = '1' THEN
+												State <= s4;
+							else 
+												State <= s2; 
+							end if;
+				
+				when s4 =>
+							if direction = '1' THEN
+												State <= s5;
+							else 
+												State <= s3; 
+							end if;
+				
+				when s5 =>
+							if direction = '1' THEN
+												State <= s6;
+							else 
+												State <= s4; 
+							end if;
+							
+				when s6 =>
+							if direction = '1' THEN
+												State <= s7;
+							else 
+												State <= s5; 
+							end if;
+							
+				when s7 =>
+							if direction = '1' THEN
+												State <= s8;
+							else 
+												State <= s6; 
+							end if;
+				
+				when s8 =>
+							if direction = '1' THEN
+												State <= s9;
+							else 
+												State <= s7; 
+							end if;
+							
+				when s9 =>
+							if direction = '1' THEN
+												State <= s10;
+							else 
+												State <= s8; 
+							end if;
+						
+				when s10 =>
+							if direction = '1' THEN
+												State <= s11;
+							else 
+												State <= s9; 
+							end if;
+							
+				when s11 =>
+							if direction = '1' THEN
+												State <= s12;
+							else 
+												State <= s10; 
+							end if;
+							
+				when s12 =>
+							if direction = '1' THEN
+												State <= s13;
+							else 
+												State <= s11; 
+							end if;
+							
+				when s13 =>
+							if direction = '1' THEN
+												State <= s14;
+							else 
+												State <= s12; 
+							end if;
+							
+				when s14 =>
+							if direction = '1' THEN
+												State <= s15;
+							else 
+												State <= s13; 
+							end if;
+							
+				when s15 =>
+							if direction = '1' THEN
+												State <= s1;
+							else 
+												State <= s14; 
+							end if;
+					end case;
+				end if;
+			end if;
+		end process;
+		
+		count <= "0001" when State = s1 else -- 1
+					"0010" when State = s2 else -- 2
+					"0100" when State = s3 else -- 4
+					"1000" when State = s4 else -- 8
+					"0011" when State = s5 else -- 3
+					"0110" when State = s6 else -- 6
+					"1100" when State = s7 else -- 12
+					"0111" when State = s8 else -- 11
+					"0101" when State = s9 else -- 5
+					"1010" when State = s10 else -- 10
+					"0111" when State = s11 else -- 7
+					"1110" when State = s12 else -- 14
+					"1111" when State = s13 else -- 15
+					"1101" when State = s14 else -- 13
+					"1001" when State = s15; -- 9
+end a0;
+					
+				
